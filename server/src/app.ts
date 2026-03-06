@@ -7,6 +7,9 @@ import { envs } from "./config/environments/envs.js";
 export const createApp = async () => {
   const app: Application = express();
 
+  // Connect to database
+  await connectToDatabase();
+
   // Middleware
   app.use(cors());
   app.use(express.json());
@@ -24,13 +27,7 @@ export const createApp = async () => {
   });
 
   // Start the server
-  app.listen(envs.PORT, async () => {
-    try {
-      console.log(`Server is running on port ${envs.PORT}`);
-      // Connect to database
-      await connectToDatabase();
-    } catch (error) {
-      console.error("Error starting server:", error);
-    }
+  app.listen(envs.PORT, () => {
+    console.log(`Server is running on port ${envs.PORT}`);
   });
 };
