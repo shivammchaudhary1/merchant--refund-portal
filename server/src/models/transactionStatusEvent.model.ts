@@ -24,7 +24,8 @@ const eventSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.model<TransactionStatusEventDocument>(
+const TransactionStatusEvent = mongoose.model<TransactionStatusEventDocument>(
   "TransactionStatusEvent",
   eventSchema,
 );
+export default TransactionStatusEvent;

@@ -24,4 +24,5 @@ const refundSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.model<RefundDocument>("Refund", refundSchema);
+const Refund = mongoose.model<RefundDocument>("Refund", refundSchema);
+export default Refund;

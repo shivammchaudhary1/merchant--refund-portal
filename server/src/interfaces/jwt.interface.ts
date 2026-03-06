@@ -1,6 +1,6 @@
 export interface JwtPayload {
   userId: string;
-  token: string;
+  role: string;
 }
 
 export interface JwtOptions {

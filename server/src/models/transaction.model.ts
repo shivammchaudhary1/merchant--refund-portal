@@ -38,7 +38,8 @@ transactionSchema.index({ merchantId: 1 });
 transactionSchema.index({ status: 1 });
 transactionSchema.index({ transactionDate: -1 });
 
-export default mongoose.model<transactionDocument>(
+const Transaction = mongoose.model<transactionDocument>(
   "Transaction",
   transactionSchema,
 );
+export default Transaction;

@@ -3,6 +3,7 @@ import compression from "compression";
 import cors from "cors";
 import { connectToDatabase } from "./config/database/db.js";
 import { envs } from "./config/environments/envs.js";
+import appRouter from "./routes/app.routes.js";
 
 export const createApp = async () => {
   const app: Application = express();
@@ -25,6 +26,9 @@ export const createApp = async () => {
     };
     res.status(200).json(response);
   });
+
+  // Apply app routes
+  appRouter(app);
 
   // Start the server
   app.listen(envs.PORT, () => {

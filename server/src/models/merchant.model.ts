@@ -41,5 +41,4 @@ const merchantSchema = new mongoose.Schema(
 );
 
 const Merchant = mongoose.model<MerchantDocument>("Merchant", merchantSchema);
-
 export default Merchant;

@@ -11,4 +11,5 @@ export const envs: EnvironmentConfig = {
     ? process.env.JWT_SECRET
     : "your_jwt_secret_key",
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "1d",
+  SALT_ROUNDS: Number(process.env.SALT_ROUNDS) || 1,
 };
