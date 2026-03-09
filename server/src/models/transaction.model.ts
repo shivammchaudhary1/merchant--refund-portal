@@ -4,6 +4,24 @@ import {
   transactionDocument,
 } from "../interfaces/transaction.interface.js";
 
+const statusHistorySchema = new mongoose.Schema({
+  status: {
+    type: String,
+    enum: [
+      "Initiated",
+      "Processing",
+      "Successful",
+      "Failed",
+      "Pending",
+      "Refunded",
+    ],
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const transactionSchema = new mongoose.Schema(
   {
     merchantId: {
@@ -27,6 +45,7 @@ const transactionSchema = new mongoose.Schema(
     transactionDate: {
       type: Date,
     },
+    statusTimeline: [statusHistorySchema],
   },
   {
     timestamps: true,

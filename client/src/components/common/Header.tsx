@@ -8,7 +8,6 @@ import {
   Stack,
   Menu,
   MenuItem,
-  IconButton,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
@@ -57,12 +56,6 @@ const Header = () => {
     { label: "Home", to: "/" },
     { label: "Dashboard", to: "/dashboard" },
     { label: "Transactions", to: "/transactions" },
-  ];
-
-  const navItems = [
-    { label: "Home", to: "/" },
-    { label: "Register", to: "/register" },
-    { label: "Login", to: "/login" },
   ];
 
   return (

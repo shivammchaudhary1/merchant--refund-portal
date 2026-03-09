@@ -73,7 +73,7 @@ const Login = () => {
     };
 
     try {
-      const result = await dispatch(login(loginData)).unwrap();
+      await dispatch(login(loginData)).unwrap();
       notify("success", "Login successful! Welcome back!");
     } catch (error) {
       console.error("Login failed:", error);
