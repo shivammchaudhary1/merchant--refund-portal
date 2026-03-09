@@ -58,7 +58,7 @@ const TransactionDetail = () => {
 
   useEffect(() => {
     if (error) {
-      notify("error", error);
+      notify("fail", error);
       dispatch(clearError());
     }
   }, [error, notify, dispatch]);
@@ -82,6 +82,21 @@ const TransactionDetail = () => {
         return "warning" as const;
       default:
         return "default" as const;
+    }
+  };
+
+  const getTimelineDotColor = (status: TransactionStatus) => {
+    switch (status) {
+      case "Successful":
+        return "success" as const;
+      case "Failed":
+        return "error" as const;
+      case "Pending":
+      case "Processing":
+      case "Initiated":
+        return "warning" as const;
+      default:
+        return "grey" as const;
     }
   };
 
@@ -166,7 +181,7 @@ const TransactionDetail = () => {
 
       <Grid container spacing={3}>
         {/* Transaction Information */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Transaction Information
@@ -174,7 +189,7 @@ const TransactionDetail = () => {
             <Divider sx={{ mb: 2 }} />
 
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Transaction ID
                 </Typography>
@@ -183,7 +198,7 @@ const TransactionDetail = () => {
                 </Typography>
               </Grid>
 
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Amount
                 </Typography>
@@ -192,7 +207,7 @@ const TransactionDetail = () => {
                 </Typography>
               </Grid>
 
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Status
                 </Typography>
@@ -206,7 +221,7 @@ const TransactionDetail = () => {
                 </Box>
               </Grid>
 
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Date
                 </Typography>
@@ -215,7 +230,7 @@ const TransactionDetail = () => {
                 </Typography>
               </Grid>
 
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Merchant ID
                 </Typography>
@@ -224,12 +239,12 @@ const TransactionDetail = () => {
                 </Typography>
               </Grid>
 
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Reference Number
                 </Typography>
                 <Typography variant="body1" fontFamily="monospace">
-                  {currentTransaction.referenceNumber || "N/A"}
+                  N/A
                 </Typography>
               </Grid>
             </Grid>
@@ -272,7 +287,7 @@ const TransactionDetail = () => {
                 </TimelineOppositeContent>
                 <TimelineSeparator>
                   <TimelineDot
-                    color={getStatusColor(currentTransaction.status)}
+                    color={getTimelineDotColor(currentTransaction.status)}
                   >
                     {getStatusIcon(currentTransaction.status)}
                   </TimelineDot>
@@ -291,7 +306,7 @@ const TransactionDetail = () => {
         </Grid>
 
         {/* Summary Card */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 3, position: "sticky", top: 24 }}>
             <Typography variant="h6" gutterBottom>
               Summary
