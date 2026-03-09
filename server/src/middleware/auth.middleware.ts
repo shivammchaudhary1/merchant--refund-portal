@@ -1,24 +1,60 @@
-import jwt from "jsonwebtoken";
+import { verifyJWT } from "../config/libraries/jwt.js";
 import { Request, Response, NextFunction } from "express";
+import { DecodedJwtPayload } from "../interfaces/jwt.interface.js";
+
+// Extend the Express Request interface to include user properties
+declare global {
+  namespace Express {
+    interface Request {
+      user?: DecodedJwtPayload;
+    }
+  }
+}
 
 export const authMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Access token required",
+      });
+    }
 
-    (req as any).user = decoded;
+    const decoded = verifyJWT(token);
+
+    req.user = decoded;
 
     next();
-  } catch (err) {
-    return res.status(401).json({ message: "Invalid token" });
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
   }
+};
+
+export const authorizeRole = (role: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to access this resource",
+      });
+    }
+
+    next();
+  };
 };

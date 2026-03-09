@@ -30,7 +30,18 @@ const registerMerchant = async (req: Request, res: Response) => {
     });
     await newMerchant.save();
 
-    res.status(201).json({ message: "Merchant registered successfully" });
+    const token = createJWT({
+      userId: newMerchant._id.toString(),
+      role: newMerchant.role,
+    });
+
+    res.status(201).json({
+      message: "Merchant registered successfully",
+      token,
+      businessName,
+      email,
+      role: newMerchant.role,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error registering merchant:", error });
   }
@@ -68,7 +79,13 @@ const loginMerchant = async (req: Request, res: Response) => {
       role: merchant.role,
     });
 
-    res.status(200).json({ name: merchant.businessName, email, token });
+    res.status(200).json({
+      Message: "Merchant logged in successfully",
+      name: merchant.businessName,
+      email,
+      token,
+      role: merchant.role,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error logging in merchant:", error });
   }

@@ -13,8 +13,12 @@ import {
 } from "@mui/material";
 import { Email, Visibility, VisibilityOff, Lock } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import type { LoginCredentials } from "../types/auth.types";
+import { useAppDispatch } from "../app/store";
+import { login } from "../app/slices/authSlice";
 
 const Login = () => {
+  const dispatch = useAppDispatch();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -31,8 +35,14 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login data:", formData);
+    // console.log("Login data:", formData);
+
+    const loginData: LoginCredentials = {
+      email: formData.email,
+      password: formData.password,
+    };
     // Add login logic here
+    dispatch(login(loginData));
   };
 
   return (
