@@ -20,8 +20,12 @@ import {
   PersonAdd,
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import { useAppDispatch } from "../app/store";
+import { register } from "../app/slices/authSlice";
+import type { RegisterData } from "../types/auth.types";
 
 const Register = () => {
+  const dispatch = useAppDispatch();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -37,9 +41,22 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Register data:", formData);
+
+    const userData: RegisterData = {
+      businessName: formData.username,
+      email: formData.email,
+      password: formData.password,
+    };
+
+    try {
+      await dispatch(register(userData));
+    } catch (error) {
+      console.error("Registration error:", error);
+    }
+
     // Add registration logic here
   };
 

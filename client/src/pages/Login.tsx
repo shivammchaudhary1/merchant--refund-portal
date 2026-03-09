@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -12,14 +12,49 @@ import {
   Link as MuiLink,
 } from "@mui/material";
 import { Email, Visibility, VisibilityOff, Lock } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import type { LoginCredentials } from "../types/auth.types";
+import { useAppDispatch, useAppSelector } from "../app/store";
+import { login } from "../app/slices/authSlice";
+import { useNotifications } from "../utils/notifications";
+
+interface LocationState {
+  from?: {
+    pathname: string;
+  };
+}
 
 const Login = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { notify } = useNotifications();
+
+  const { isAuthenticated, error } = useAppSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+
+  // Get the page user was trying to access before login
+  const from =
+    (location.state as LocationState)?.from?.pathname || "/dashboard";
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
+
+  // Handle login success/error
+  useEffect(() => {
+    if (error) {
+      notify("fail", error);
+    }
+  }, [error, notify]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,10 +64,20 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login data:", formData);
-    // Add login logic here
+
+    const loginData: LoginCredentials = {
+      email: formData.email,
+      password: formData.password,
+    };
+
+    try {
+      const result = await dispatch(login(loginData)).unwrap();
+      notify("success", "Login successful! Welcome back!");
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   return (
