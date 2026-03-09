@@ -28,6 +28,35 @@ export interface AuthState {
   error: string | null;
 }
 
+// Login credentials interface
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+// Registration data interface
+export interface RegisterData {
+  businessName: string;
+  email: string;
+  password: string;
+}
+
+// API response interface
+// export interface AuthResponse {
+//   _id: string;
+//   name?: string;
+//   businessName?: string;
+//   email: string;
+//   role: string;
+//   token: string;
+//   message?: string;
+// }
+
+// Config for async thunks
+export interface AsyncThunkConfig {
+  rejectValue: string;
+}
+
 // Login credentials
 export interface LoginCredentials {
   email: string;

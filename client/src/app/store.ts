@@ -3,11 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 import authReducer from "./slices/authSlice";
 import alertReducer from "./slices/alertSlice";
+import transactionReducer from "./slices/transactionSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     alert: alertReducer,
+    transaction: transactionReducer,
   },
 });
 

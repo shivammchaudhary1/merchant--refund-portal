@@ -5,6 +5,13 @@ export enum TransactionStatus {
   FAILED = "Failed",
   PENDING = "Pending",
   REFUNDED = "Refunded",
+  INITIATED = "Initiated",
+  PROCESSING = "Processing",
+}
+
+export interface iStatusHistory {
+  status: TransactionStatus;
+  updatedAt: Date;
 }
 
 export interface iTransaction {
@@ -13,6 +20,7 @@ export interface iTransaction {
   amount: number;
   status: TransactionStatus;
   transactionDate: Date;
+  statusTimeline: iStatusHistory[];
 }
 
 export interface transactionDocument extends iTransaction, Document {
