@@ -2,13 +2,12 @@ import mongoose from "mongoose";
 import { faker } from "@faker-js/faker";
 import { v4 as uuidv4 } from "uuid";
 import Transaction from "../../dist/models/transaction.model.js";
+import { envs } from "../config/environments.js";
 
 async function seedTransactions() {
   try {
-    await mongoose.connect(
-      "mongodb+srv://shivamchaudhary75:shivam@cluster0.hww36wm.mongodb.net/merchant-refund-portal?appName=Cluster0",
-    );
-    console.log("Connected to MongoDB");
+    await mongoose.connect(envs.MONGODB_URI);
+    // console.log("Connected to MongoDB");
 
     const merchantId = "69af0147701fb62737b02e32";
 
