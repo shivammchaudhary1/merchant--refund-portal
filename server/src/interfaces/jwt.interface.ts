@@ -3,10 +3,6 @@ export interface JwtPayload {
   role: string;
 }
 
-export interface JwtOptions {
-  expiresIn?: string;
-}
-
 export interface DecodedJwtPayload extends JwtPayload {
   iat?: number;
   exp?: number;

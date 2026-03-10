@@ -1,16 +1,10 @@
 import { Request, Response } from "express";
 import Transaction from "../models/transaction.model.js";
 import Refund from "../models/refund.model.js";
-import { TransactionStatus } from "../interfaces/transaction.interface.js";
-
-interface TransactionQuery {
-  merchantId?: string;
-  page?: string;
-  limit?: string;
-  status?: string;
-  startDate?: string;
-  endDate?: string;
-}
+import {
+  TransactionStatus,
+  TransactionQuery,
+} from "../interfaces/transaction.interface.js";
 
 export const getTransactions = async (req: Request, res: Response) => {
   try {

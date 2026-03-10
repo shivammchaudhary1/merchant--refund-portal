@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
-import type { AlertType, NotificationPayload, AlertState } from "../../types";
+import type { NotificationPayload, AlertState } from "../../types";
 
 // Initial state
 const initialState: AlertState = {

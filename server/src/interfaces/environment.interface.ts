@@ -5,8 +5,3 @@ export interface EnvironmentConfig {
   JWT_EXPIRES_IN: string;
   SALT_ROUNDS: number;
 }
-
-export interface IServerConfig {
-  port: number;
-  env: string;
-}
