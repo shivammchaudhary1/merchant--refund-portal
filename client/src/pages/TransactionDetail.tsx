@@ -9,9 +9,9 @@ import {
   Button,
   Stack,
   Alert,
-  CircularProgress,
   Divider,
 } from "@mui/material";
+import Loader from "../components/common/Loader";
 import {
   Timeline,
   TimelineItem,
@@ -133,7 +133,7 @@ const TransactionDetail = () => {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-          <CircularProgress />
+          <Loader />
         </Box>
       </Container>
     );

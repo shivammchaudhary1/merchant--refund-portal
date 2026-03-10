@@ -18,10 +18,10 @@ import {
   Button,
   Stack,
   Alert,
-  CircularProgress,
   Card,
   CardContent,
 } from "@mui/material";
+import Loader from "../components/common/Loader";
 import {
   Search,
   FilterList,
@@ -390,7 +390,7 @@ const Transactions = () => {
       <Paper sx={{ mb: 3 }}>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-            <CircularProgress />
+            <Loader />
           </Box>
         ) : (
           <TableContainer>
