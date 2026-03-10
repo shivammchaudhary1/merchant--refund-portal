@@ -49,7 +49,7 @@ const TransactionDetail = () => {
   const dispatch = useAppDispatch();
   const { notify } = useNotifications();
 
-  const { currentTransaction, loading, error } = useAppSelector(
+  const { currentTransaction, currentRefund, loading, error } = useAppSelector(
     (state) => state.transaction,
   );
 
@@ -287,49 +287,28 @@ const TransactionDetail = () => {
             <Divider sx={{ mb: 2 }} />
 
             <Timeline position="left">
-              <TimelineItem>
-                <TimelineOppositeContent color="text.secondary">
-                  {formatDate(currentTransaction.transactionDate)}
-                </TimelineOppositeContent>
-                <TimelineSeparator>
-                  <TimelineDot color="primary">
-                    <Receipt />
-                  </TimelineDot>
-                  <TimelineConnector />
-                </TimelineSeparator>
-                <TimelineContent>
-                  <Typography variant="h6" component="span">
-                    Transaction Initiated
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Amount: {formatCurrency(currentTransaction.amount)}
-                  </Typography>
-                </TimelineContent>
-              </TimelineItem>
-
-              <TimelineItem>
-                <TimelineOppositeContent color="text.secondary">
-                  {formatDate(
-                    currentTransaction.updatedAt ||
-                      currentTransaction.transactionDate,
-                  )}
-                </TimelineOppositeContent>
-                <TimelineSeparator>
-                  <TimelineDot
-                    color={getTimelineDotColor(currentTransaction.status)}
-                  >
-                    {getStatusIcon(currentTransaction.status)}
-                  </TimelineDot>
-                </TimelineSeparator>
-                <TimelineContent>
-                  <Typography variant="h6" component="span">
-                    {currentTransaction.status}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Current transaction status
-                  </Typography>
-                </TimelineContent>
-              </TimelineItem>
+              {currentTransaction.statusTimeline.map((entry, index) => {
+                const isLast =
+                  index === currentTransaction.statusTimeline.length - 1;
+                return (
+                  <TimelineItem key={index}>
+                    <TimelineOppositeContent color="text.secondary">
+                      {formatDate(entry.updatedAt)}
+                    </TimelineOppositeContent>
+                    <TimelineSeparator>
+                      <TimelineDot color={getTimelineDotColor(entry.status)}>
+                        {getStatusIcon(entry.status)}
+                      </TimelineDot>
+                      {!isLast && <TimelineConnector />}
+                    </TimelineSeparator>
+                    <TimelineContent>
+                      <Typography variant="h6" component="span">
+                        {entry.status}
+                      </Typography>
+                    </TimelineContent>
+                  </TimelineItem>
+                );
+              })}
             </Timeline>
           </Paper>
         </Grid>
@@ -348,9 +327,24 @@ const TransactionDetail = () => {
                   Total Amount
                 </Typography>
                 <Typography variant="h5" color="primary" fontWeight={600}>
-                  {formatCurrency(currentTransaction.amount)}
+                  {formatCurrency(
+                    currentTransaction.status === "Refunded" && currentRefund
+                      ? currentRefund.originalAmount
+                      : currentTransaction.amount,
+                  )}
                 </Typography>
               </Box>
+
+              {currentTransaction.status === "Refunded" && currentRefund && (
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Refund Amount
+                  </Typography>
+                  <Typography variant="body1" color="error" fontWeight={500}>
+                    − {formatCurrency(currentRefund.amount)}
+                  </Typography>
+                </Box>
+              )}
 
               <Box>
                 <Typography variant="body2" color="text.secondary">

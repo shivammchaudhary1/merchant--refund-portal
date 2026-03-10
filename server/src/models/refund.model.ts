@@ -11,6 +11,9 @@ const refundSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Merchant",
     },
+    originalAmount: {
+      type: Number,
+    },
     amount: {
       type: Number,
     },

@@ -141,9 +141,16 @@ export const getTransactionById = async (req: Request, res: Response) => {
       });
     }
 
+    let refund = null;
+    if (transaction.status === TransactionStatus.REFUNDED) {
+      refund = await Refund.findOne({
+        transactionId: transaction._id.toString(),
+      }).lean();
+    }
+
     res.json({
       success: true,
-      data: transaction,
+      data: { transaction, refund },
     });
   } catch (error: any) {
     console.error("Error fetching transaction by ID:", error);
@@ -238,11 +245,13 @@ export const refundTransaction = async (req: Request, res: Response) => {
     const refund = await Refund.create({
       transactionId: transaction._id.toString(),
       merchantId,
+      originalAmount: transaction.amount,
       amount,
       reason,
     });
 
-    // Update transaction status and timeline
+    // Update transaction: deduct refund amount and update status and timeline
+    transaction.amount = transaction.amount - amount;
     transaction.status = TransactionStatus.REFUNDED;
     transaction.statusTimeline.push({
       status: TransactionStatus.REFUNDED,

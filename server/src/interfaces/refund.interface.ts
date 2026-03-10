@@ -3,6 +3,7 @@ import { Document } from "mongoose";
 export interface iRefund {
   transactionId: string;
   merchantId: string;
+  originalAmount: number;
   amount: number;
   reason: string;
 }

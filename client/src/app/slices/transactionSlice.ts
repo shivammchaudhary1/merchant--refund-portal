@@ -5,6 +5,7 @@ import type {
   Transaction,
   TransactionResponse,
   TransactionDetailResponse,
+  RefundResponse,
   TransactionQuery,
   TransactionState,
   AsyncThunkConfig,
@@ -13,6 +14,7 @@ import type {
 const initialState: TransactionState = {
   transactions: [],
   currentTransaction: null,
+  currentRefund: null,
   pagination: null,
   filters: null,
   loading: false,
@@ -112,7 +114,7 @@ export const fetchTransactionById = createAsyncThunk<
 );
 
 export const initiateRefund = createAsyncThunk<
-  TransactionDetailResponse,
+  RefundResponse,
   { transactionId: string; amount: number; reason: string },
   AsyncThunkConfig
 >(
@@ -137,7 +139,7 @@ export const initiateRefund = createAsyncThunk<
         },
       );
 
-      const data: TransactionDetailResponse = await response.json();
+      const data: RefundResponse = await response.json();
 
       if (!response.ok) {
         return rejectWithValue(data.message || "Failed to initiate refund");
@@ -202,7 +204,8 @@ const transactionSlice = createSlice({
         fetchTransactionById.fulfilled,
         (state, action: PayloadAction<TransactionDetailResponse>) => {
           state.loading = false;
-          state.currentTransaction = action.payload.data;
+          state.currentTransaction = action.payload.data.transaction;
+          state.currentRefund = action.payload.data.refund;
           state.error = null;
         },
       )
@@ -219,9 +222,10 @@ const transactionSlice = createSlice({
       })
       .addCase(
         initiateRefund.fulfilled,
-        (state, action: PayloadAction<TransactionDetailResponse>) => {
+        (state, action: PayloadAction<RefundResponse>) => {
           state.loading = false;
-          state.currentTransaction = action.payload.data;
+          state.currentTransaction = action.payload.data.transaction;
+          state.currentRefund = action.payload.data.refund;
           state.error = null;
         },
       )
