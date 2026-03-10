@@ -13,16 +13,10 @@ import {
 } from "@mui/material";
 import { Email, Visibility, VisibilityOff, Lock } from "@mui/icons-material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import type { LoginCredentials } from "../types/auth.types";
+import type { LoginCredentials, LocationState } from "../types";
 import { useAppDispatch, useAppSelector } from "../app/store";
 import { login } from "../app/slices/authSlice";
 import { useNotifications } from "../utils/notifications";
-
-interface LocationState {
-  from?: {
-    pathname: string;
-  };
-}
 
 const Login = () => {
   const dispatch = useAppDispatch();

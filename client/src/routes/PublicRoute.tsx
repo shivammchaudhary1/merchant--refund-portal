@@ -1,11 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAppSelector } from "../app/store";
-import type { ReactNode } from "react";
-
-interface PublicRouteProps {
-  children: ReactNode;
-}
+import type { PublicRouteProps } from "../types";
 
 /**
  * PublicRoute component for Login and Register pages

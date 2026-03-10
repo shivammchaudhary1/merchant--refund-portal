@@ -1,6 +1,6 @@
 import { useAppDispatch } from "../app/store";
 import { showNotification } from "../app/slices/alertSlice";
-import type { AlertType } from "../app/slices/alertSlice";
+import type { AlertType } from "../types";
 
 // Custom hook for easy notification usage
 export const useNotifications = () => {
