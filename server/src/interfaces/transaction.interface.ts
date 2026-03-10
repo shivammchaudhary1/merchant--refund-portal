@@ -12,6 +12,8 @@ export enum TransactionStatus {
 export interface iStatusHistory {
   status: TransactionStatus;
   updatedAt: Date;
+  refundedAmount?: number;
+  note?: string;
 }
 
 export interface iTransaction {

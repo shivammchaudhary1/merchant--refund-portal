@@ -29,11 +29,14 @@ import {
   Payment,
   Receipt,
 } from "@mui/icons-material";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
+
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../app/store";
 import {
   fetchTransactionById,
   clearError,
+  initiateRefund,
 } from "../app/slices/transactionSlice";
 import { useNotifications } from "../utils/notifications";
 import type { TransactionStatus } from "../types";
@@ -151,6 +154,32 @@ const TransactionDetail = () => {
       </Container>
     );
   }
+
+  const handleRefund = () => {
+    console.log(
+      "Refund initiated for transaction:",
+      currentTransaction.transactionId,
+    );
+
+    try {
+      dispatch(
+        initiateRefund({
+          transactionId: currentTransaction.transactionId,
+          amount: currentTransaction.amount * 0.8,
+          reason: "Customer requested refund",
+        }),
+      );
+    } catch (error) {
+      console.error("Error initiating refund:", error);
+    }
+  };
+
+  const isRefundEligible = () => {
+    return (
+      currentTransaction.status === "Successful" &&
+      dayjs().diff(dayjs(currentTransaction.transactionDate), "day") <= 30
+    );
+  };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -359,6 +388,28 @@ const TransactionDetail = () => {
                   sx={{ mt: 1, display: "block" }}
                 >
                   Available for successful transactions
+                </Typography>
+              </Box>
+
+              {/* refund  */}
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<CurrencyExchangeIcon />}
+                  disabled={!isRefundEligible()}
+                  onClick={handleRefund}
+                >
+                  Refund
+                </Button>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mt: 1, display: "block" }}
+                >
+                  Refunds can only be initiated for successful transactions
+                  within 30 days of the transaction date. Partial refunds are
+                  allowed.
                 </Typography>
               </Box>
             </Stack>

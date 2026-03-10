@@ -16,6 +16,14 @@ const statusHistorySchema = new mongoose.Schema({
       "Refunded",
     ],
   },
+  refundedAmount: {
+    type: Number,
+    default: 0,
+  },
+  note: {
+    type: String,
+    default: "",
+  },
   updatedAt: {
     type: Date,
     default: Date.now,
@@ -37,6 +45,7 @@ const transactionSchema = new mongoose.Schema(
     amount: {
       type: Number,
     },
+
     status: {
       type: String,
       enum: Object.values(TransactionStatus),
