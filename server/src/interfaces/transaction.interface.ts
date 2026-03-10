@@ -12,6 +12,8 @@ export enum TransactionStatus {
 export interface iStatusHistory {
   status: TransactionStatus;
   updatedAt: Date;
+  refundedAmount?: number;
+  note?: string;
 }
 
 export interface iTransaction {
@@ -28,14 +30,11 @@ export interface transactionDocument extends iTransaction, Document {
   updatedAt: Date;
 }
 
-export interface iTransactionStatusEvent {
-  transactionId: string;
-  status?: TransactionStatus;
-  note: string;
-}
-
-export interface TransactionStatusEventDocument
-  extends iTransactionStatusEvent, Document {
-  createdAt: Date;
-  updatedAt: Date;
+export interface TransactionQuery {
+  merchantId?: string;
+  page?: string;
+  limit?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
 }

@@ -9,9 +9,9 @@ import {
   Button,
   Stack,
   Alert,
-  CircularProgress,
   Divider,
 } from "@mui/material";
+import Loader from "../components/common/Loader";
 import {
   Timeline,
   TimelineItem,
@@ -29,11 +29,14 @@ import {
   Payment,
   Receipt,
 } from "@mui/icons-material";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
+
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../app/store";
 import {
   fetchTransactionById,
   clearError,
+  initiateRefund,
 } from "../app/slices/transactionSlice";
 import { useNotifications } from "../utils/notifications";
 import type { TransactionStatus } from "../types";
@@ -46,7 +49,7 @@ const TransactionDetail = () => {
   const dispatch = useAppDispatch();
   const { notify } = useNotifications();
 
-  const { currentTransaction, loading, error } = useAppSelector(
+  const { currentTransaction, currentRefund, loading, error } = useAppSelector(
     (state) => state.transaction,
   );
 
@@ -130,7 +133,7 @@ const TransactionDetail = () => {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-          <CircularProgress />
+          <Loader />
         </Box>
       </Container>
     );
@@ -151,6 +154,32 @@ const TransactionDetail = () => {
       </Container>
     );
   }
+
+  const handleRefund = () => {
+    console.log(
+      "Refund initiated for transaction:",
+      currentTransaction.transactionId,
+    );
+
+    try {
+      dispatch(
+        initiateRefund({
+          transactionId: currentTransaction.transactionId,
+          amount: currentTransaction.amount * 0.8,
+          reason: "Customer requested refund",
+        }),
+      );
+    } catch (error) {
+      console.error("Error initiating refund:", error);
+    }
+  };
+
+  const isRefundEligible = () => {
+    return (
+      currentTransaction.status === "Successful" &&
+      dayjs().diff(dayjs(currentTransaction.transactionDate), "day") <= 30
+    );
+  };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -258,49 +287,28 @@ const TransactionDetail = () => {
             <Divider sx={{ mb: 2 }} />
 
             <Timeline position="left">
-              <TimelineItem>
-                <TimelineOppositeContent color="text.secondary">
-                  {formatDate(currentTransaction.transactionDate)}
-                </TimelineOppositeContent>
-                <TimelineSeparator>
-                  <TimelineDot color="primary">
-                    <Receipt />
-                  </TimelineDot>
-                  <TimelineConnector />
-                </TimelineSeparator>
-                <TimelineContent>
-                  <Typography variant="h6" component="span">
-                    Transaction Initiated
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Amount: {formatCurrency(currentTransaction.amount)}
-                  </Typography>
-                </TimelineContent>
-              </TimelineItem>
-
-              <TimelineItem>
-                <TimelineOppositeContent color="text.secondary">
-                  {formatDate(
-                    currentTransaction.updatedAt ||
-                      currentTransaction.transactionDate,
-                  )}
-                </TimelineOppositeContent>
-                <TimelineSeparator>
-                  <TimelineDot
-                    color={getTimelineDotColor(currentTransaction.status)}
-                  >
-                    {getStatusIcon(currentTransaction.status)}
-                  </TimelineDot>
-                </TimelineSeparator>
-                <TimelineContent>
-                  <Typography variant="h6" component="span">
-                    {currentTransaction.status}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Current transaction status
-                  </Typography>
-                </TimelineContent>
-              </TimelineItem>
+              {currentTransaction.statusTimeline.map((entry, index) => {
+                const isLast =
+                  index === currentTransaction.statusTimeline.length - 1;
+                return (
+                  <TimelineItem key={index}>
+                    <TimelineOppositeContent color="text.secondary">
+                      {formatDate(entry.updatedAt)}
+                    </TimelineOppositeContent>
+                    <TimelineSeparator>
+                      <TimelineDot color={getTimelineDotColor(entry.status)}>
+                        {getStatusIcon(entry.status)}
+                      </TimelineDot>
+                      {!isLast && <TimelineConnector />}
+                    </TimelineSeparator>
+                    <TimelineContent>
+                      <Typography variant="h6" component="span">
+                        {entry.status}
+                      </Typography>
+                    </TimelineContent>
+                  </TimelineItem>
+                );
+              })}
             </Timeline>
           </Paper>
         </Grid>
@@ -319,9 +327,24 @@ const TransactionDetail = () => {
                   Total Amount
                 </Typography>
                 <Typography variant="h5" color="primary" fontWeight={600}>
-                  {formatCurrency(currentTransaction.amount)}
+                  {formatCurrency(
+                    currentTransaction.status === "Refunded" && currentRefund
+                      ? currentRefund.originalAmount
+                      : currentTransaction.amount,
+                  )}
                 </Typography>
               </Box>
+
+              {currentTransaction.status === "Refunded" && currentRefund && (
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Refund Amount
+                  </Typography>
+                  <Typography variant="body1" color="error" fontWeight={500}>
+                    − {formatCurrency(currentRefund.amount)}
+                  </Typography>
+                </Box>
+              )}
 
               <Box>
                 <Typography variant="body2" color="text.secondary">
@@ -359,6 +382,28 @@ const TransactionDetail = () => {
                   sx={{ mt: 1, display: "block" }}
                 >
                   Available for successful transactions
+                </Typography>
+              </Box>
+
+              {/* refund  */}
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<CurrencyExchangeIcon />}
+                  disabled={!isRefundEligible()}
+                  onClick={handleRefund}
+                >
+                  Refund
+                </Button>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mt: 1, display: "block" }}
+                >
+                  Refunds can only be initiated for successful transactions
+                  within 30 days of the transaction date. Partial refunds are
+                  allowed.
                 </Typography>
               </Box>
             </Stack>

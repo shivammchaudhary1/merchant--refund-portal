@@ -54,7 +54,6 @@ const Header = () => {
   // Navigation items for authenticated users
   const protectedNavItems = [
     { label: "Home", to: "/" },
-    { label: "Dashboard", to: "/dashboard" },
     { label: "Transactions", to: "/transactions" },
   ];
 

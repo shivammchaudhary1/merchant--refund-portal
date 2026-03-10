@@ -1,25 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
-
-// Define the alert types
-export type AlertType = "success" | "fail" | "warning";
-
-// Define the notification payload
-export interface NotificationPayload {
-  type: AlertType;
-  message: string;
-}
-
-// Define the alert state
-export interface AlertState {
-  alerts: Array<{
-    id: string;
-    message: string;
-    type: AlertType;
-    timestamp: number;
-  }>;
-}
+import type { NotificationPayload, AlertState } from "../../types";
 
 // Initial state
 const initialState: AlertState = {

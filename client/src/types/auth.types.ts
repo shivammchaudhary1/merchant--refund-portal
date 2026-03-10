@@ -39,36 +39,12 @@ export interface RegisterData {
   businessName: string;
   email: string;
   password: string;
+  role?: UserRole;
 }
-
-// API response interface
-// export interface AuthResponse {
-//   _id: string;
-//   name?: string;
-//   businessName?: string;
-//   email: string;
-//   role: string;
-//   token: string;
-//   message?: string;
-// }
 
 // Config for async thunks
 export interface AsyncThunkConfig {
   rejectValue: string;
-}
-
-// Login credentials
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-// Register data
-export interface RegisterData {
-  businessName: string;
-  email: string;
-  password: string;
-  role?: UserRole;
 }
 
 // API Response interfaces
@@ -90,7 +66,9 @@ export interface ApiError {
   errors?: string[];
 }
 
-// Redux async thunk types
-export interface AsyncThunkConfig {
-  rejectValue: string;
+// Location state for login redirect
+export interface LocationState {
+  from?: {
+    pathname: string;
+  };
 }

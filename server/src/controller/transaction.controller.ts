@@ -1,15 +1,10 @@
 import { Request, Response } from "express";
 import Transaction from "../models/transaction.model.js";
-import { TransactionStatus } from "../interfaces/transaction.interface.js";
-
-interface TransactionQuery {
-  merchantId?: string;
-  page?: string;
-  limit?: string;
-  status?: string;
-  startDate?: string;
-  endDate?: string;
-}
+import Refund from "../models/refund.model.js";
+import {
+  TransactionStatus,
+  TransactionQuery,
+} from "../interfaces/transaction.interface.js";
 
 export const getTransactions = async (req: Request, res: Response) => {
   try {
@@ -140,12 +135,134 @@ export const getTransactionById = async (req: Request, res: Response) => {
       });
     }
 
+    let refund = null;
+    if (transaction.status === TransactionStatus.REFUNDED) {
+      refund = await Refund.findOne({
+        transactionId: transaction._id.toString(),
+      }).lean();
+    }
+
     res.json({
       success: true,
-      data: transaction,
+      data: { transaction, refund },
     });
   } catch (error: any) {
     console.error("Error fetching transaction by ID:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+export const refundTransaction = async (req: Request, res: Response) => {
+  try {
+    const { transactionId } = req.params;
+    const { amount, reason } = req.body;
+    const merchantId = req.user?.userId;
+
+    console.log("Refund request received for transactionId:", transactionId);
+    console.log("Refund amount:", amount);
+    console.log("Refund reason:", reason);
+    console.log("Merchant ID:", merchantId);
+
+    //     Refund request received for transactionId: 25b1f54f-b212-4663-b869-8ea1e776a958
+    // Refund amount: 35000
+    // Refund reason: yese hi
+    // Merchant ID: 69aefa96dd6aa1314f24db85
+
+    if (!merchantId) {
+      return res.status(400).json({
+        success: false,
+        message: "Merchant ID is required",
+      });
+    }
+
+    const transaction = await Transaction.findOne({
+      transactionId: transactionId,
+      merchantId: merchantId,
+    });
+
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: "Transaction not found",
+      });
+    }
+
+    // Rule 1: Only Successful transactions are eligible for refund
+    if (transaction.status !== TransactionStatus.SUCCESS) {
+      return res.status(400).json({
+        success: false,
+        message: "Only successful transactions are eligible for refund",
+      });
+    }
+
+    // Rule 2: A transaction can only be refunded once
+    const existingRefund = await Refund.findOne({
+      transactionId: transaction._id.toString(),
+    });
+    if (existingRefund) {
+      return res.status(400).json({
+        success: false,
+        message: "Transaction has already been refunded",
+      });
+    }
+
+    // Rule 3: Refund must be raised within 30 days of the transaction date
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    if (transaction.transactionDate < thirtyDaysAgo) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Refund period has expired. Refunds must be raised within 30 days of the transaction date",
+      });
+    }
+
+    // Rule 4 & 5: Refund amount must be valid and cannot exceed original amount (partial refunds allowed)
+    if (!amount || typeof amount !== "number" || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid refund amount is required",
+      });
+    }
+
+    if (amount > transaction.amount) {
+      return res.status(400).json({
+        success: false,
+        message: "Refund amount cannot exceed the original transaction amount",
+      });
+    }
+
+    // Create refund record
+    const refund = await Refund.create({
+      transactionId: transaction._id.toString(),
+      merchantId,
+      originalAmount: transaction.amount,
+      amount,
+      reason,
+    });
+
+    // Update transaction: deduct refund amount and update status and timeline
+    transaction.amount = transaction.amount - amount;
+    transaction.status = TransactionStatus.REFUNDED;
+    transaction.statusTimeline.push({
+      status: TransactionStatus.REFUNDED,
+      refundedAmount: amount,
+      note: reason,
+      updatedAt: new Date(),
+    });
+
+    await transaction.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Transaction refunded successfully",
+      data: { transaction, refund },
+    });
+  } catch (error: any) {
+    console.error("Error refunding transaction:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

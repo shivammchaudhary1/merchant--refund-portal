@@ -52,7 +52,30 @@ export interface TransactionResponse {
 export interface TransactionDetailResponse {
   success: boolean;
   message?: string;
-  data: Transaction;
+  data: {
+    transaction: Transaction;
+    refund: Refund | null;
+  };
+}
+
+export interface Refund {
+  _id: string;
+  transactionId: string;
+  merchantId: string;
+  originalAmount: number;
+  amount: number;
+  reason: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RefundResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    transaction: Transaction;
+    refund: Refund;
+  };
 }
 
 export interface TransactionQuery {
@@ -67,6 +90,7 @@ export interface TransactionQuery {
 export interface TransactionState {
   transactions: Transaction[];
   currentTransaction: Transaction | null;
+  currentRefund: Refund | null;
   pagination: TransactionPagination | null;
   filters: TransactionFilters | null;
   loading: boolean;

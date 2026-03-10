@@ -5,6 +5,7 @@ import type {
   Transaction,
   TransactionResponse,
   TransactionDetailResponse,
+  RefundResponse,
   TransactionQuery,
   TransactionState,
   AsyncThunkConfig,
@@ -13,6 +14,7 @@ import type {
 const initialState: TransactionState = {
   transactions: [],
   currentTransaction: null,
+  currentRefund: null,
   pagination: null,
   filters: null,
   loading: false,
@@ -111,6 +113,47 @@ export const fetchTransactionById = createAsyncThunk<
   },
 );
 
+export const initiateRefund = createAsyncThunk<
+  RefundResponse,
+  { transactionId: string; amount: number; reason: string },
+  AsyncThunkConfig
+>(
+  "transaction/initiateRefund",
+  async ({ transactionId, amount, reason }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("mrptoken");
+
+      if (!token) {
+        return rejectWithValue("Authentication required");
+      }
+
+      const response = await fetch(
+        `${config.BACKEND_API}/api/transactions/${transactionId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ amount, reason }),
+        },
+      );
+
+      const data: RefundResponse = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to initiate refund");
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "An unknown error occurred",
+      );
+    }
+  },
+);
+
 const transactionSlice = createSlice({
   name: "transaction",
   initialState,
@@ -161,13 +204,34 @@ const transactionSlice = createSlice({
         fetchTransactionById.fulfilled,
         (state, action: PayloadAction<TransactionDetailResponse>) => {
           state.loading = false;
-          state.currentTransaction = action.payload.data;
+          state.currentTransaction = action.payload.data.transaction;
+          state.currentRefund = action.payload.data.refund;
           state.error = null;
         },
       )
       .addCase(fetchTransactionById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch transaction";
+      });
+
+    // Initiate refund cases
+    builder
+      .addCase(initiateRefund.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        initiateRefund.fulfilled,
+        (state, action: PayloadAction<RefundResponse>) => {
+          state.loading = false;
+          state.currentTransaction = action.payload.data.transaction;
+          state.currentRefund = action.payload.data.refund;
+          state.error = null;
+        },
+      )
+      .addCase(initiateRefund.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to initiate refund";
       });
   },
 });
